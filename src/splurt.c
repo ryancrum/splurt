@@ -160,11 +160,6 @@ draw_jpeg_file(image_t *image, int fit_width, int fit_height) {
       mvaddch(y + y_margin, x + x_margin, ' ' | A_REVERSE);
       attroff(COLOR_PAIR(color));
     }
-
-    // if we've gone all the way to the edge no newline is needed
-    if (x < (COLS - 1)) {
-      addch('\n');
-    }
   }
 }
 
