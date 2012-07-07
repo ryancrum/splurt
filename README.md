@@ -1,9 +1,13 @@
 # splurt
 The Useless Terminal Jpeg Viewer
 
+splurt requires a 256-color compatible terminal emulator
+
 ## Usage
 
 Just run `splurt path/to/image.jpg` and behold the splendor.
+
+![Engage](doc/screen.jpg)
 
 ## Build
 
