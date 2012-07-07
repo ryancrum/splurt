@@ -189,6 +189,8 @@ main(int argc, char **argv) {
   fclose(fin);
   
   initscr();
+  curs_set(0);
+  
   if (!has_colors()) {
     endwin();
     printf("Color support not detected.\n");
