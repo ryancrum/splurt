@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 typedef struct {
   int width;
@@ -69,8 +70,10 @@ load_jpeg_file(FILE *in_file, image_t *img) {
   row_stride = cinfo.output_width * cinfo.output_components;
   
   buffer = (JSAMPARRAY)malloc(sizeof(JSAMPROW));
+  assert(buffer != NULL);
   buffer[0] = (JSAMPROW)malloc(sizeof(JSAMPLE) * row_stride);
-
+  assert(buffer[0] != NULL);
+  
   img->width = cinfo.output_width;
   img->height = cinfo.output_height;
   img->components = cinfo.output_components;
@@ -78,6 +81,8 @@ load_jpeg_file(FILE *in_file, image_t *img) {
   img->pixels = (unsigned char *)malloc(cinfo.output_width *
                                         cinfo.output_height *
                                         cinfo.output_components);
+
+  assert(img->pixels != NULL);
 
   while (cinfo.output_scanline < cinfo.output_height) {
     jpeg_read_scanlines(&cinfo, buffer, 1);
