@@ -11,7 +11,7 @@ Just run `splurt path/to/image.jpg` and behold the splendor.
 
 ## Build
 
-Splurt uses cmake.
+Splurt uses cmake and requires libjpeg and ncurses.
 
 First: `cmake .`
 Then: `make`
