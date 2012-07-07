@@ -40,13 +40,10 @@ typedef struct {
  */
 unsigned char
 rgb(unsigned char r, unsigned char g, unsigned char b) {
-  float rf = (float)r/255.0f;
-  float gf = (float)g/255.0f;
-  float bf = (float)b/255.0f;
-
-  return (unsigned char)(((int)(rf * 5.0f) * 36) +
-                         ((int)(gf * 5.0f) * 6) +
-                         (int)(bf * 5.0f) + 16);
+  // magic number 0.019608 ~= 5 / 255
+  return (unsigned char)(((int)(r * 0.019608f) * 36) +
+                         ((int)(g * 0.019608f) * 6) +
+                         (int)(b * 0.019608f) + 16);
 }
 
 /**
@@ -78,10 +75,9 @@ load_jpeg_file(FILE *in_file, image_t *img) {
   img->height = cinfo.output_height;
   img->components = cinfo.output_components;
   
-  img->pixels =
-    (unsigned char *)malloc(cinfo.output_width *
-                            cinfo.output_height *
-                            cinfo.output_components);
+  img->pixels = (unsigned char *)malloc(cinfo.output_width *
+                                        cinfo.output_height *
+                                        cinfo.output_components);
 
   while (cinfo.output_scanline < cinfo.output_height) {
     jpeg_read_scanlines(&cinfo, buffer, 1);
@@ -102,11 +98,25 @@ load_jpeg_file(FILE *in_file, image_t *img) {
  */
 void
 draw_jpeg_file(image_t *image, int fit_width, int fit_height) {
-  // terminal heights generally /2 due to character heightsw
-  float image_aspect = (float)image->width / (float)image->height;
-  float term_aspect = ((float)fit_width / (float)fit_height) / 2;
+  
+  // terminal height /2 due to character heights
+  float image_aspect = (float)image->width / (float)image->height,
+    term_aspect = ((float)fit_width / (float)fit_height) / 2,
+    scale = 1.0f;
+  
+  int x = 0,
+    y = 0,
+    m = 0,
+    x_margin = 0,
+    y_margin = 0,
+    img_x = 0,
+    img_y = 0,
+    y_offset = 0;
 
-  float scale;
+  unsigned long index = 0;
+  unsigned char color = 0;
+  unsigned char *offset = NULL;
+
 
   if (term_aspect > image_aspect) {
     // terminal is wider than image
@@ -117,12 +127,8 @@ draw_jpeg_file(image_t *image, int fit_width, int fit_height) {
     fit_height = (int)((float)image->height * scale) / 2;
   }
 
-  int x = 0,
-    y = 0,
-    m = 0;
-
-  int x_margin = fit_width < COLS ? (COLS - fit_width - 1) / 2 : 0;
-  int y_margin = fit_height < LINES ? (LINES - fit_height - 1) / 2 : 0;
+  x_margin = fit_width < COLS ? (COLS - fit_width - 1) / 2 : 0;
+  y_margin = fit_height < LINES ? (LINES - fit_height - 1) / 2 : 0;
 
   // skip down to center the image vertically
   for (m = 0; m < y_margin; m++) {
@@ -131,23 +137,22 @@ draw_jpeg_file(image_t *image, int fit_width, int fit_height) {
   
   for (y = 0; y < fit_height; y++) {
 
-    // create a left margin to center the iamge horizonally
+    // create a left margin to center the image horizonally
     for (m = 0; m < x_margin; m++) {
       addch(' ');
     }
     
-    int img_y = (int)(((float)y / (float)fit_height) * image->height);
-    int y_offset = (img_y *
-                    image->width *
-                    image->components);
+    img_y = (int)(((float)y / (float)fit_height) * image->height);
+    y_offset = (img_y *
+                image->width *
+                image->components);
     
     for (x = 0; x < fit_width; x++) {
-      int img_x = (int)(((float)x / (float)fit_width) * image->width);
-      unsigned long index = y_offset + (img_x * image->components);
+      img_x = (int)(((float)x / (float)fit_width) * image->width);
+      index = y_offset + (img_x * image->components);
       
-      unsigned char *offset = (unsigned char *)(image->pixels + index);
+      offset = (unsigned char *)(image->pixels + index);
 
-      unsigned char color;
       if (image->components == 1) {
         // grayscale
         color = rgb(*offset, *offset, *offset);
@@ -170,14 +175,16 @@ draw_jpeg_file(image_t *image, int fit_width, int fit_height) {
 
 int
 main(int argc, char **argv) {
+  image_t image;
+  FILE *fin = NULL;
+  int i = 0;
+  
   if (argc != 2) {
-    printf("Correct usage: termimg FILENAME\n");
+    printf("Correct usage: splurt FILENAME\n");
     exit(1);
   }
-  char *filename = argv[1];
 
-  image_t image;
-  FILE *fin = fopen(filename, "r");
+  fin = fopen(argv[1], "r");
   load_jpeg_file(fin, &image);
   fclose(fin);
   
@@ -195,7 +202,9 @@ main(int argc, char **argv) {
   }
 
   start_color();
-  for (int i = 0; i < 256; i++) {
+  
+  // initialize the color pairs
+  for (i = 0; i < 256; i++) {
     init_pair(i, i, COLOR_BLACK);
   }
 
