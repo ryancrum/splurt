@@ -35,8 +35,6 @@ typedef struct {
   unsigned char * pixels;
 } image_t;
 
-void (*default_error_exit)() = NULL;
-
 /**
  * Convert a 24-bit color into an 8-bit terminal color.
  */
