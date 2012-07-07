@@ -137,13 +137,13 @@ draw_jpeg_file(image_t *image, int fit_width, int fit_height) {
     }
     
     int img_y = (int)(((float)y / (float)fit_height) * image->height);
+    int y_offset = (img_y *
+                    image->width *
+                    image->components);
+    
     for (x = 0; x < fit_width; x++) {
-      
       int img_x = (int)(((float)x / (float)fit_width) * image->width);
-      unsigned long index = (img_y *
-                             image->width *
-                             image->components) +
-        (img_x * image->components);
+      unsigned long index = y_offset + (img_x * image->components);
       
       unsigned char *offset = (unsigned char *)(image->pixels + index);
 
