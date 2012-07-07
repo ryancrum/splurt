@@ -35,6 +35,8 @@ typedef struct {
   unsigned char * pixels;
 } image_t;
 
+void (*default_error_exit)() = NULL;
+
 /**
  * Convert a 24-bit color into an 8-bit terminal color.
  */
@@ -177,20 +179,15 @@ int
 main(int argc, char **argv) {
   image_t image;
   FILE *fin = NULL;
-  int i = 0;
+  int i = 0, j = 0;
   
-  if (argc != 2) {
+  if (argc < 2) {
     printf("Correct usage: splurt FILENAME\n");
     exit(1);
   }
 
-  fin = fopen(argv[1], "r");
-  load_jpeg_file(fin, &image);
-  fclose(fin);
-  
+  // Validate the terminal properties
   initscr();
-  curs_set(0);
-  
   if (!has_colors()) {
     endwin();
     printf("Color support not detected.\n");
@@ -202,20 +199,38 @@ main(int argc, char **argv) {
     printf("256 color support not detected.\n");
     exit(1);
   }
-
-  start_color();
-  
-  // initialize the color pairs
-  for (i = 0; i < 256; i++) {
-    init_pair(i, i, COLOR_BLACK);
-  }
-
-  draw_jpeg_file(&image, COLS, LINES);
-
-  refresh();
-  getch();
   endwin();
 
-  free(image.pixels);
+  for (j = 1; j < argc; j++) {
+    // Load jpeg outside of ncurses context so any errors leave the terminal
+    // in a good state
+    fin = fopen(argv[j], "r");
+    load_jpeg_file(fin, &image);
+    fclose(fin);
+  
+    initscr();
+
+    // hide cursor
+    curs_set(0);
+
+    start_color();
+  
+    // initialize the color pairs
+    for (i = 0; i < 256; i++) {
+      init_pair(i, i, COLOR_BLACK);
+    }
+
+    draw_jpeg_file(&image, COLS, LINES);
+
+    refresh();
+    getch();
+    
+    clear(); // clear the terminal to prepare for the next image
+
+    endwin();
+    
+    free(image.pixels);
+  }
+  
   return 0;
 }
