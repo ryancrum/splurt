@@ -1,0 +1,5 @@
+cmake_minimum_required (VERSION 2.6)
+project (splurt)
+add_definitions(-std=c99)
+add_executable (splurt src/splurt.c)
+target_link_libraries (splurt jpeg ncurses)

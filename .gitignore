@@ -1,0 +1,6 @@
+*.dSYM
+CMakeFiles/*
+cmake_install.cmake
+splurt
+CMakeCache.txt
+Makefile
