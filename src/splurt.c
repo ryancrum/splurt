@@ -208,31 +208,36 @@ main(int argc, char **argv) {
     // Load jpeg outside of ncurses context so any errors leave the terminal
     // in a good state
     fin = fopen(argv[j], "r");
-    load_jpeg_file(fin, &image);
-    fclose(fin);
+    if (fin != NULL) {
+      load_jpeg_file(fin, &image);
+      fclose(fin);
   
-    initscr();
+      initscr();
+      
+      // hide cursor
+      curs_set(0);
+      
+      start_color();
+      
+      // initialize the color pairs
+      for (i = 0; i < 256; i++) {
+        init_pair(i, i, COLOR_BLACK);
+      }
+      
+      draw_jpeg_file(&image, COLS, LINES);
+      
+      refresh();
+      getch();
+    
+      clear(); // clear the terminal to prepare for the next image
 
-    // hide cursor
-    curs_set(0);
-
-    start_color();
-  
-    // initialize the color pairs
-    for (i = 0; i < 256; i++) {
-      init_pair(i, i, COLOR_BLACK);
+      endwin();
+    
+      free(image.pixels);
+      image.pixels = NULL;
+    } else {
+      printf("File not found: %s\n", argv[j]);
     }
-
-    draw_jpeg_file(&image, COLS, LINES);
-
-    refresh();
-    getch();
-    
-    clear(); // clear the terminal to prepare for the next image
-
-    endwin();
-    
-    free(image.pixels);
   }
   
   return 0;
