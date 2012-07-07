@@ -1,3 +1,27 @@
+/* splurt
+ * The Useless Terminal Jpeg Viewer
+ *
+ * Copyright (c) 2012 Ryan Crum <ryan.j.crum@gmail.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 #include <ncurses.h>
 #include <jpeglib.h>
 #include <stdio.h>
@@ -11,6 +35,9 @@ typedef struct {
   unsigned char * pixels;
 } image_t;
 
+/**
+ * Convert a 24-bit color into an 8-bit terminal color.
+ */
 unsigned char
 rgb(unsigned char r, unsigned char g, unsigned char b) {
   float rf = (float)r/255.0f;
@@ -22,6 +49,9 @@ rgb(unsigned char r, unsigned char g, unsigned char b) {
                          (int)(bf * 5.0f) + 16);
 }
 
+/**
+ * Read a jpeg file into an image_t struct.
+ */
 void
 load_jpeg_file(FILE *in_file, image_t *img) {
   struct jpeg_decompress_struct cinfo;
@@ -66,6 +96,10 @@ load_jpeg_file(FILE *in_file, image_t *img) {
   free(buffer);
 }
 
+/**
+ * Draw the image_t onto the terminal inside the specified dimensions.
+ * Scales the image as necessary for aspect-ratio'ing.
+ */
 void
 draw_jpeg_file(image_t *image, int fit_width, int fit_height) {
   // terminal heights generally /2 due to character heightsw
@@ -89,13 +123,15 @@ draw_jpeg_file(image_t *image, int fit_width, int fit_height) {
 
   int x_margin = fit_width < COLS ? (COLS - fit_width - 1) / 2 : 0;
   int y_margin = fit_height < LINES ? (LINES - fit_height - 1) / 2 : 0;
-  
+
+  // skip down to center the image vertically
   for (m = 0; m < y_margin; m++) {
     addch('\n');
   }
   
   for (y = 0; y < fit_height; y++) {
 
+    // create a left margin to center the iamge horizonally
     for (m = 0; m < x_margin; m++) {
       addch(' ');
     }
@@ -113,8 +149,10 @@ draw_jpeg_file(image_t *image, int fit_width, int fit_height) {
 
       unsigned char color;
       if (image->components == 1) {
+        // grayscale
         color = rgb(*offset, *offset, *offset);
       } else {
+        // full color
         color = rgb(*(offset), *(offset + 1), *(offset + 2));
       }
       
@@ -123,6 +161,7 @@ draw_jpeg_file(image_t *image, int fit_width, int fit_height) {
       attroff(COLOR_PAIR(color));
     }
 
+    // if we've gone all the way to the edge no newline is needed
     if (x < (COLS - 1)) {
       addch('\n');
     }
@@ -149,11 +188,16 @@ main(int argc, char **argv) {
     exit(1);
   }
 
+  if (tigetnum("colors") != 256) {
+    endwin();
+    printf("256 color support not detected.\n");
+    exit(1);
+  }
+
   start_color();
   for (int i = 0; i < 256; i++) {
     init_pair(i, i, COLOR_BLACK);
   }
-
 
   draw_jpeg_file(&image, COLS, LINES);
 
