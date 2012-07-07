@@ -135,18 +135,7 @@ draw_jpeg_file(image_t *image, int fit_width, int fit_height) {
   x_margin = fit_width < COLS ? (COLS - fit_width - 1) / 2 : 0;
   y_margin = fit_height < LINES ? (LINES - fit_height - 1) / 2 : 0;
 
-  // skip down to center the image vertically
-  for (m = 0; m < y_margin; m++) {
-    addch('\n');
-  }
-  
   for (y = 0; y < fit_height; y++) {
-
-    // create a left margin to center the image horizonally
-    for (m = 0; m < x_margin; m++) {
-      addch(' ');
-    }
-    
     img_y = (int)(((float)y / (float)fit_height) * image->height);
     y_offset = (img_y *
                 image->width *
@@ -167,7 +156,7 @@ draw_jpeg_file(image_t *image, int fit_width, int fit_height) {
       }
       
       attron(COLOR_PAIR(color));
-      addch(' ' | A_REVERSE);
+      mvaddch(y + y_margin, x + x_margin, ' ' | A_REVERSE);
       attroff(COLOR_PAIR(color));
     }
 
