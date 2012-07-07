@@ -1,6 +1,8 @@
 # splurt
 The Useless Terminal Jpeg Viewer
 
+splurt draws a jpeg image directly into your terminal.
+
 splurt requires a 256-color compatible terminal emulator
 
 ## Usage
