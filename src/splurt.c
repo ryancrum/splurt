@@ -99,7 +99,8 @@ load_jpeg_file(FILE *in_file, image_t *img) {
 
 /**
  * Draw the image_t onto the terminal inside the specified dimensions.
- * Scales the image as necessary for aspect-ratio'ing.
+ * Scales the image as necessary for aspect-ratio'ing with a naive
+ * nearest-neighbor algorithm.
  */
 void
 draw_jpeg_file(image_t *image, int fit_width, int fit_height) {
