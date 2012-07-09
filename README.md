@@ -13,10 +13,11 @@ Just run `splurt path/to/image.jpg` and behold the splendor.
 
 ## Build
 
-Splurt uses cmake and requires libjpeg and ncurses.
+Splurt requires libjpeg and ncurses.
 
-First: `cmake .`
-Then: `make`
+```bash
+./configure && make && make install
+```
 
 ## License
 
