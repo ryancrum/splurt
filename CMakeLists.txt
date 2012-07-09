@@ -1,6 +1,0 @@
-cmake_minimum_required (VERSION 2.6)
-project (splurt)
-set(CMAKE_EXE_LINKER_FLAGS -Bstatic)
-add_definitions(-std=c99)
-add_executable (splurt src/splurt.c)
-target_link_libraries (splurt jpeg ncurses)
