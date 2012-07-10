@@ -9,7 +9,6 @@ autoscan.log
 config.h
 config.log
 config.status
-missing
 src/.deps/
 src/splurt.o
 stamp-h1
