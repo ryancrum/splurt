@@ -31,18 +31,20 @@
 #include <limits.h>
 #include "splurt.h"
 
-inline int euclidean_dist_sq(unsigned char *q, unsigned char *p, int size) {
-  int i = 0;
-  int sum = 0;
-  int diff = 0;
+/**
+ * Find the squared euclidean distance of a 3-dimensional
+ * vector.
+ */
+inline int
+euclidean_dist_sq_3(unsigned char *q,
+                    unsigned char *p) {
+  int diff1 = (int)q[0] - (int)p[0];
+  int diff2 = (int)q[1] - (int)p[1];
+  int diff3 = (int)q[2] - (int)p[2];
   
-  for (i = 0; i < size; ++i) {
-    diff = (int)q[i] - (int)p[i];
-
-    sum += (diff * diff);
-  }
-
-  return sum;
+  return (diff1 * diff1) +
+    (diff2 * diff2) +
+    (diff3 * diff3);
 }
 
 /**
@@ -57,9 +59,8 @@ rgb(unsigned char r, unsigned char g, unsigned char b) {
 
   for (i = 1; i < 256; ++i) {
     unsigned char vec[3] = { r, g, b };
-    dist = euclidean_dist_sq(COLOR_TABLE[i],
-                             vec,
-                             3);
+    dist = euclidean_dist_sq_3(COLOR_TABLE[i],
+                               vec);
 
     if (dist < lowest_dist) {
       lowest_dist = dist;
@@ -68,17 +69,6 @@ rgb(unsigned char r, unsigned char g, unsigned char b) {
   }
 
   return lowest_idx;
-}
-
-/**
- * Convert a 24-bit color into an 8-bit terminal color.
- */
-unsigned char
-rgb_naive(unsigned char r, unsigned char g, unsigned char b) {
-  // magic number 0.019608 ~= 5 / 255
-  return (unsigned char)(((int)(r * 0.019608f) * 36) +
-                         ((int)(g * 0.019608f) * 6) +
-                         (int)(b * 0.019608f) + 16);
 }
 
 /**
