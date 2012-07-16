@@ -28,23 +28,47 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <limits.h>
+#include "splurt.h"
 
-typedef struct {
-  int width;
-  int height;
-  int components;
-  unsigned char * pixels;
-} image_t;
+/**
+ * Find the squared euclidean distance of a 3-dimensional
+ * vector.
+ */
+inline int
+euclidean_dist_sq_3(unsigned char *q,
+                    unsigned char *p) {
+  int diff1 = (int)q[0] - (int)p[0];
+  int diff2 = (int)q[1] - (int)p[1];
+  int diff3 = (int)q[2] - (int)p[2];
+  
+  return (diff1 * diff1) +
+    (diff2 * diff2) +
+    (diff3 * diff3);
+}
 
 /**
  * Convert a 24-bit color into an 8-bit terminal color.
  */
 unsigned char
 rgb(unsigned char r, unsigned char g, unsigned char b) {
-  // magic number 0.019608 ~= 5 / 255
-  return (unsigned char)(((int)(r * 0.019608f) * 36) +
-                         ((int)(g * 0.019608f) * 6) +
-                         (int)(b * 0.019608f) + 16);
+  unsigned int lowest_dist = UINT_MAX;
+  int lowest_idx = 0;
+  int i = 0;
+  int dist = 0;
+
+  for (i = 1; i < 256; ++i) {
+    unsigned char vec[3] = { r, g, b };
+    dist = euclidean_dist_sq_3(COLOR_TABLE[i],
+                               vec);
+
+    if (dist < lowest_dist) {
+      lowest_dist = dist;
+      lowest_idx = i;
+    }
+  }
+
+  return lowest_idx;
 }
 
 /**
@@ -205,7 +229,7 @@ main(int argc, char **argv) {
       start_color();
       
       // initialize the color pairs
-      for (i = 0; i < 256; i++) {
+      for (i = 0; i < 256; ++i) {
         init_pair(i, i, COLOR_BLACK);
       }
       
