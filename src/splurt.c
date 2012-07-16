@@ -28,19 +28,53 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <limits.h>
+#include "splurt.h"
 
-typedef struct {
-  int width;
-  int height;
-  int components;
-  unsigned char * pixels;
-} image_t;
+inline int euclidean_dist_sq(unsigned char *q, unsigned char *p, int size) {
+  int i = 0;
+  int sum = 0;
+  int diff = 0;
+  
+  for (i = 0; i < size; ++i) {
+    diff = (int)q[i] - (int)p[i];
+
+    sum += (diff * diff);
+  }
+
+  return sum;
+}
 
 /**
  * Convert a 24-bit color into an 8-bit terminal color.
  */
 unsigned char
 rgb(unsigned char r, unsigned char g, unsigned char b) {
+  unsigned int lowest_dist = UINT_MAX;
+  int lowest_idx = 0;
+  int i = 0;
+  int dist = 0;
+
+  for (i = 1; i < 256; ++i) {
+    unsigned char vec[3] = { r, g, b };
+    dist = euclidean_dist_sq(COLOR_TABLE[i],
+                             vec,
+                             3);
+
+    if (dist < lowest_dist) {
+      lowest_dist = dist;
+      lowest_idx = i;
+    }
+  }
+
+  return lowest_idx;
+}
+
+/**
+ * Convert a 24-bit color into an 8-bit terminal color.
+ */
+unsigned char
+rgb_naive(unsigned char r, unsigned char g, unsigned char b) {
   // magic number 0.019608 ~= 5 / 255
   return (unsigned char)(((int)(r * 0.019608f) * 36) +
                          ((int)(g * 0.019608f) * 6) +
@@ -205,7 +239,7 @@ main(int argc, char **argv) {
       start_color();
       
       // initialize the color pairs
-      for (i = 0; i < 256; i++) {
+      for (i = 0; i < 256; ++i) {
         init_pair(i, i, COLOR_BLACK);
       }
       
