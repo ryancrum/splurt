@@ -1,7 +1,7 @@
 # Maintainer: Ryan Crum <ryan.j.crum@gmail.com>
 pkgname=splurt-git
-pkgver=20120710
-pkgrel=1
+pkgver=20120716
+pkgrel=2
 pkgdesc="Terminal image viewer"
 arch=('i686' 'x86_64')
 url="http://github.com/thorstadt/splurt"
@@ -11,7 +11,7 @@ depends=('libjpeg' 'ncurses')
 makedepends=('git')
 provides=('splurt')
 conflicts=('splurt')
-md5sums=() #generate with 'makepkg -g'
+md5sums=()
 
 _gitroot=git://github.com/thorstadt/splurt.git
 _gitname=splurt
