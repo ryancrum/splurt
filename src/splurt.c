@@ -12,7 +12,7 @@
  *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -41,7 +41,7 @@ euclidean_dist_sq_3(unsigned char *q,
   int diff1 = (int)q[0] - (int)p[0];
   int diff2 = (int)q[1] - (int)p[1];
   int diff3 = (int)q[2] - (int)p[2];
-  
+
   return (diff1 * diff1) +
     (diff2 * diff2) +
     (diff3 * diff3);
@@ -78,7 +78,7 @@ void
 load_jpeg_file(FILE *in_file, image_t *img) {
   struct jpeg_decompress_struct cinfo;
   struct jpeg_error_mgr jerr;
-  
+
   JSAMPARRAY buffer;
   int row_stride;
   long counter = 0;
@@ -92,16 +92,16 @@ load_jpeg_file(FILE *in_file, image_t *img) {
   jpeg_start_decompress(&cinfo);
 
   row_stride = cinfo.output_width * cinfo.output_components;
-  
+
   buffer = (JSAMPARRAY)malloc(sizeof(JSAMPROW));
   assert(buffer != NULL);
   buffer[0] = (JSAMPROW)malloc(sizeof(JSAMPLE) * row_stride);
   assert(buffer[0] != NULL);
-  
+
   img->width = cinfo.output_width;
   img->height = cinfo.output_height;
   img->components = cinfo.output_components;
-  
+
   img->pixels = (unsigned char *)malloc(cinfo.output_width *
                                         cinfo.output_height *
                                         cinfo.output_components);
@@ -128,12 +128,12 @@ load_jpeg_file(FILE *in_file, image_t *img) {
  */
 void
 draw_jpeg_file(image_t *image, int fit_width, int fit_height) {
-  
+
   // terminal height /2 due to character heights
   float image_aspect = (float)image->width / (float)image->height,
     term_aspect = ((float)fit_width / (float)fit_height) / 2,
     scale = 1.0f;
-  
+
   int x = 0,
     y = 0,
     m = 0,
@@ -165,11 +165,11 @@ draw_jpeg_file(image_t *image, int fit_width, int fit_height) {
     y_offset = (img_y *
                 image->width *
                 image->components);
-    
+
     for (x = 0; x < fit_width; x++) {
       img_x = (int)(((float)x / (float)fit_width) * image->width);
       index = y_offset + (img_x * image->components);
-      
+
       offset = (unsigned char *)(image->pixels + index);
 
       if (image->components == 1) {
@@ -179,7 +179,7 @@ draw_jpeg_file(image_t *image, int fit_width, int fit_height) {
         // full color
         color = rgb(*(offset), *(offset + 1), *(offset + 2));
       }
-      
+
       attron(COLOR_PAIR(color));
       mvaddch(y + y_margin, x + x_margin, ' ' | A_REVERSE);
       attroff(COLOR_PAIR(color));
@@ -192,7 +192,7 @@ main(int argc, char **argv) {
   image_t image;
   FILE *fin = NULL;
   int i = 0, j = 0;
-  
+
   if (argc < 2) {
     printf("Correct usage: splurt FILENAME\n");
     exit(1);
@@ -220,34 +220,34 @@ main(int argc, char **argv) {
     if (fin != NULL) {
       load_jpeg_file(fin, &image);
       fclose(fin);
-  
+
       initscr();
-      
+
       // hide cursor
       curs_set(0);
-      
+
       start_color();
-      
+
       // initialize the color pairs
       for (i = 0; i < 256; ++i) {
         init_pair(i, i, COLOR_BLACK);
       }
-      
+
       draw_jpeg_file(&image, COLS, LINES);
-      
+
       refresh();
       getch();
-    
+
       clear(); // clear the terminal to prepare for the next image
 
       endwin();
-    
+
       free(image.pixels);
       image.pixels = NULL;
     } else {
       printf("File not found: %s\n", argv[j]);
     }
   }
-  
+
   return 0;
 }
