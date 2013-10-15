@@ -4,11 +4,3 @@ cmake_install.cmake
 splurt
 CMakeCache.txt
 Makefile
-autom4te.cache/
-autoscan.log
-config.h
-config.log
-config.status
-src/.deps/
-src/splurt.o
-stamp-h1
