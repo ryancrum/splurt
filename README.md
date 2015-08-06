@@ -9,7 +9,7 @@ splurt requires a 256-color compatible terminal emulator
 
 Just run `splurt path/to/image.jpg` and behold the splendor.
 
-![Engage](http://github.com/thorstadt/splurt/raw/master/doc/screen.png)
+![Engage](doc/screen.png)
 
 ## Build
 
