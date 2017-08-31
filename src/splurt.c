@@ -35,7 +35,7 @@
  * Find the squared euclidean distance of a 3-dimensional
  * vector.
  */
-inline int
+int
 euclidean_dist_sq_3(unsigned char *q,
                     unsigned char *p) {
   int diff1 = (int)q[0] - (int)p[0];
